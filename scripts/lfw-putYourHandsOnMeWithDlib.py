@@ -289,7 +289,7 @@ def main():
     # ----------------------------------------------------------------------
     # Arguments
 
-    ap = argparse.ArgumentParser(prog="lfw-makeitLookCool-dlib")
+    ap = argparse.ArgumentParser(prog="lfw-putYourHandsOnMe")
     ap.add_argument("-i", "--import",    type=str, help="Import folder with faces and labels to match in /faces and /labels folders, respectively.")
     ap.add_argument("-d", "--dataset",   type=str, help="Path to the hands dataset (Hand2Face or hand_over_face).")
     ap.add_argument("-e", "--export",    type=str, help="Export folder to save faces augmented with hands.")
@@ -357,7 +357,7 @@ def main():
     # Dlib init
 
     global dlib_detector, dlib_predictor
-    shape_predictor = './facedetectors/dlib/shape_predictor_68_face_landmarks.dat'
+    shape_predictor = './dlib/shape_predictor_68_face_landmarks.dat'
     print('\033[1m' + 'Initiating Dlib from ' + shape_predictor + '\033[0m')
     global dlib_detector, dlib_predictor
     dlib_detector = dlib.get_frontal_face_detector()

@@ -7,7 +7,7 @@ import sys
 import cv2
 import os
 import fnmatch
-import imutils
+# import imutils
 from random import randint
 from random import random
 from random import shuffle
@@ -78,7 +78,7 @@ def objectOverlay(canvas, item, reference_distance, reference_center, labels, it
 #----------------------------------------------------------------------------------------------------
 
 if len(sys.argv) != 5:
-	print("Usage: $ lfw-makeItLookCool <faces folder> <labels folder> <wearables folder> <output folder>")
+	print("Usage: $ lfw-makeThemWearSunglasses <faces folder> <labels folder> <wearables folder> <output folder>")
 	exit(0)
 
 faces_folder	 = sys.argv[1]
@@ -88,7 +88,7 @@ output_folder	 = sys.argv[4]
 
 output_folder_faces  = os.path.join(output_folder, 'faces')
 output_folder_labels = os.path.join(output_folder, 'labels')
-output_folder_debug  = os.path.join(output_folder, 'debug')
+# output_folder_debug  = os.path.join(output_folder, 'debug')
 
 if not os.path.exists(output_folder):
 	os.mkdir(output_folder)
@@ -131,12 +131,11 @@ for wearable_file in os.listdir(wearables_folder):
 		continue
 
 	if fnmatch.fnmatch(wearable_file, '*sunglasses*'):
-		img = cv2.imread(wearables_folder + wearable_file, cv2.IMREAD_UNCHANGED)
+		img = cv2.imread(os.path.join(wearables_folder, wearable_file), cv2.IMREAD_UNCHANGED)
 		sunglasses.append([img, os.path.splitext(wearable_file)[0]])
 
 #-----------------------------------------------------------------------------------------------------
-# For each image, look for the face and, if it does not already include sunglasses, paste some 
-# over the (detected) eyes
+# For each image, look for a face and, if it does not already include sunglasses, paste one on the (detected) eyes
 
 counter_all_images     = 0
 counter_no_jpg         = 0
@@ -165,9 +164,9 @@ for n, face_file in enumerate(os.listdir(faces_folder)):
 		counter_no_jpg += 1
 		continue
 
-#	# Use this to debug for a specific image or images...
-#	if not fnmatch.fnmatch(face_file, '*Amer_al*'):
-#		continue
+	# # Use this to debug for a specific image or images...
+	# if not fnmatch.fnmatch(face_file, '*Amer_al*'):
+	# 	continue
 
 	# Before doing anything, we should check whether the original image contains already some 
 	# pixels labeled as sunglasses. If so, we will not augment this image
@@ -184,9 +183,9 @@ for n, face_file in enumerate(os.listdir(faces_folder)):
 		mask_c[index] = 1
 		mask = mask * mask_c
 
-	if np.sum(mask)>0:
-		#print(bcolors.BLUE + "Already has sunglasses: " + base_name + bcolors.ENDC)
-		#cv2.imwrite(output_folder_debug + base_name + '.ppm', labels)
+	if np.sum(mask) > 0:
+		# print(bcolors.BLUE + "Already has sunglasses: " + base_name + bcolors.ENDC)
+		# cv2.imwrite(output_folder_debug + base_name + '.ppm', labels)
 		counter_with_glasses += 1
 		continue
 
@@ -196,59 +195,58 @@ for n, face_file in enumerate(os.listdir(faces_folder)):
 	# Face pre-processing for detection of face and eyes
 	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 	cv2.equalizeHist(gray)
-	ih, iw = gray.shape
-	center = [iw*0.5, ih*0.5]
+	# ih, iw = gray.shape
+	# center = [iw*0.5, ih*0.5]
 
 	# Detect faces in image
 	faces = face_cascade.detectMultiScale(gray, 1.1, 6)
-	if faces is None: 
+	if not len(faces): 
 		counter_no_face += 1
 		continue
 	#print(bcolors.YELLOW + "  -- Number of faces detected: " + str(len(faces)) + bcolors.ENDC)
 
 	# When there are multiple detections, it is hard to tell which is the proper one
 	# since we have lots of images to augment, we will discard these cases
-	if len(faces)>1:
+	if len(faces) > 1:
 		counter_multiple_faces += 1
 		continue
 		
 	# Put sunglasses on the different detected face - actually we only have one face, 
 	# since other cases have been discarded
 	for face_id, (x,y,w,h) in enumerate(faces):
+		face_center = [x + w * 0.5, y + h * 0.5]
 		roi_gray  = gray[y:y+h, x:x+w]
 		roi_color = image[y:y+h, x:x+w]
-		#cv2.line(image,(0,125),(250,125),(255, 0, 0), 1)
+		# cv2.line(image,(0,int(face_center[1])),(250,int(face_center[1])),(255, 0, 0), 1)
+		# cv2.line(image,(int(face_center[0]),0),(int(face_center[0]),250),(255, 0, 0), 1)
 
 		# Eyes detection on the current face
-		eyes = eye_cascade.detectMultiScale(roi_gray, 1.1, 6)
-		num_eyes  = 0
-		right_eye = 0
-		left_eye  = 0
-		middle_eye = np.array([0,0])
-
+		eyes = eye_cascade.detectMultiScale(roi_gray, 1.05, 5)
+		right_eye = []
+		left_eye  = []
 		for (ex, ey, ew, eh) in eyes:
-			eye_center = [x + ex + ew * 0.5, y + ey + eh * 0.5]
-			if eye_center[1] < center[0]:
+			eye_center = np.array([x + ex + ew * 0.5, y + ey + eh * 0.5])
+			if eye_center[1] < face_center[1]:
 				# cv2.rectangle(roi_color, (ex, ey), (ex + ew, ey + eh), (0, 255, 0), 2)
-				middle_eye = middle_eye + eye_center
-				if eye_center[0] > center[0]:
+				if eye_center[0] > face_center[0]:
 					left_eye = eye_center
-				else :
+				else:
 					right_eye = eye_center
-				num_eyes = num_eyes + 1
 
-		if num_eyes != 2 or not left_eye or not right_eye:
+		if not len(left_eye) or not len(right_eye):
 			counter_no_eyes += 1
 			continue
 
-		middle_eye = middle_eye / num_eyes
+		# Eyes are more reliable to estimate face size, even for masks
+		reference_size = (left_eye[0] - right_eye[0]) * 0.5
+		middle_eye = (left_eye + right_eye) * 0.5
 
-		# Paste sunglasses over the eyes 
+		# Paste sunglasses on the eyes 
 		# Use only a random number of the available: shuffle the list and take the k first
 		shuffle(sunglasses)
 		for i in range(10):
 			
-			# create copies so we don't keep pasting glasses on the same image all the time
+			# create copies so we don't keep pasting items on the same image all the time
 			im = image.copy()
 			lb = labels.copy()
 
@@ -257,9 +255,8 @@ for n, face_file in enumerate(os.listdir(faces_folder)):
 			aug_id = sunglasses[i][1]
 			#aug_id = str(i).zfill(4)
 
-			# overlay the sunglasses
-			objectOverlay(im, G, left_eye[0] - middle_eye[0], middle_eye, lb, "sunglasses" )
-
+			# overlay item
+			objectOverlay(im, G, reference_size, middle_eye, lb, "sunglasses" )
 
 			# save image and labels
 			augmented_face_file   = os.path.join(output_folder_faces,  base_name+'_'+aug_id+'.jpg')
@@ -273,7 +270,7 @@ for n, face_file in enumerate(os.listdir(faces_folder)):
 		
 print("\n" + bcolors.RED  + "Total number of files .... " + bcolors.ENDC + str(counter_all_images))
 print("\n" + bcolors.BOLD + "No jpg images ............ " + bcolors.ENDC + str(counter_no_jpg))
-print(       bcolors.BOLD + "With sunglasses .......... " + bcolors.ENDC + str(counter_with_glasses))
+print(       bcolors.BOLD + "With real sunglasses ..... " + bcolors.ENDC + str(counter_with_glasses))
 print(       bcolors.BOLD + "No face detected ......... " + bcolors.ENDC + str(counter_no_face))
 print(       bcolors.BOLD + "Several faces detected ... " + bcolors.ENDC + str(counter_multiple_faces))
 print(       bcolors.BOLD + "No eyes detected ......... " + bcolors.ENDC + str(counter_no_eyes))

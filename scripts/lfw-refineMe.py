@@ -1,5 +1,5 @@
 # This code fills superpixels by scribbling over the image with a given labeled color.
-# It requires all jpg faces storaged in the same folder and the .dat super-pixels in the same LFW format.
+# It requires all jpg faces stored in the same folder and the .dat super-pixels in the same LFW format.
 # R. Redondo, Eurecat 2019 (c).
 
 import numpy as np
