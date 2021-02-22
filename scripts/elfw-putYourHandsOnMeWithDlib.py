@@ -289,7 +289,7 @@ def main():
     # ----------------------------------------------------------------------
     # Arguments
 
-    ap = argparse.ArgumentParser(prog="lfw-putYourHandsOnMe")
+    ap = argparse.ArgumentParser(prog="elfw-putYourHandsOnMeWithDlib")
     ap.add_argument("-i", "--import",    type=str, help="Import folder with faces and labels to match in /faces and /labels folders, respectively.")
     ap.add_argument("-d", "--dataset",   type=str, help="Path to the hands dataset (Hand2Face or hand_over_face).")
     ap.add_argument("-e", "--export",    type=str, help="Export folder to save faces augmented with hands.")

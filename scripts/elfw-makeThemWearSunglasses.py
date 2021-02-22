@@ -1,4 +1,4 @@
-# This code augments the Labeled Faces in the Wild dataset with Masks!
+# This code augments the Labeled Faces in the Wild dataset with sunglasses!
 # J.Gibert based on code by R.Redondo, Eurecat 2019 (c).
 
 
@@ -78,7 +78,7 @@ def objectOverlay(canvas, item, reference_distance, reference_center, labels, it
 #----------------------------------------------------------------------------------------------------
 
 if len(sys.argv) != 5:
-	print("Usage: $ lfw-makeThemWearMasks <faces folder> <labels folder> <wearables folder> <output folder>")
+	print("Usage: $ elfw-makeThemWearSunglasses <faces folder> <labels folder> <wearables folder> <output folder>")
 	exit(0)
 
 faces_folder	 = sys.argv[1]
@@ -88,7 +88,7 @@ output_folder	 = sys.argv[4]
 
 output_folder_faces  = os.path.join(output_folder, 'faces')
 output_folder_labels = os.path.join(output_folder, 'labels')
-#output_folder_debug  = os.path.join(output_folder, 'debug')
+# output_folder_debug  = os.path.join(output_folder, 'debug')
 
 if not os.path.exists(output_folder):
 	os.mkdir(output_folder)
@@ -106,8 +106,6 @@ if not os.path.exists(output_folder_labels):
 haar_folder 	= os.path.join(os.path.dirname(cv2.__file__), 'data')
 haar_face_ddbb 	= os.path.join(haar_folder, "haarcascade_frontalface_default.xml")
 haar_eye_ddbb 	= os.path.join(haar_folder, "haarcascade_eye.xml")
-haar_mouth_ddbb = os.path.join(haar_folder, "haarcascade_smile.xml")
-
 
 print('\n' + bcolors.BOLD + 'Initiating Haar detector from ' + haar_folder + bcolors.ENDC)
 
@@ -121,29 +119,23 @@ if not eye_cascade.load(haar_eye_ddbb):
 	print('--(!)Error loading eye cascade')
 	exit(0)
 
-mouth_cascade 	= cv2.CascadeClassifier()
-if not mouth_cascade.load(haar_mouth_ddbb):
-	print('--(!)Error loading mouth cascade')
-	exit(0)
-
 print(bcolors.GREEN + 'DONE!' + bcolors.ENDC)
 print("")
 
 #-----------------------------------------------------------------------------------------------------
-# Keep masks around in a list of images 
-masks = []
+# Keep sunglasses around in a list of images 
+sunglasses = []
 for wearable_file in os.listdir(wearables_folder):
 
 	if not wearable_file.endswith(".png"):
 		continue
 
-	if fnmatch.fnmatch(wearable_file, '*mask*'):
+	if fnmatch.fnmatch(wearable_file, '*sunglasses*'):
 		img = cv2.imread(os.path.join(wearables_folder, wearable_file), cv2.IMREAD_UNCHANGED)
-		masks.append([img, os.path.splitext(wearable_file)[0]])
-
+		sunglasses.append([img, os.path.splitext(wearable_file)[0]])
 
 #-----------------------------------------------------------------------------------------------------
-# For each image, look for a face and paste a mouth-mask on the (detected) mouth
+# For each image, look for a face and, if it does not already include sunglasses, paste one on the (detected) eyes
 
 counter_all_images     = 0
 counter_no_jpg         = 0
@@ -151,7 +143,6 @@ counter_with_glasses   = 0
 counter_no_face        = 0
 counter_multiple_faces = 0
 counter_no_eyes        = 0
-counter_no_mouth	   = 0
 counter_saved_images   = 0
 
 N = len(os.listdir(faces_folder))
@@ -177,8 +168,26 @@ for n, face_file in enumerate(os.listdir(faces_folder)):
 	# if not fnmatch.fnmatch(face_file, '*Amer_al*'):
 	# 	continue
 
+	# Before doing anything, we should check whether the original image contains already some 
+	# pixels labeled as sunglasses. If so, we will not augment this image
+
 	# Load labels image
 	labels = cv2.imread(os.path.join(labels_folder, base_name+'.png'))
+
+	# Build up a mask for the sunglasses class
+	sunglasses_color = label_colors[4]
+	mask = np.ones((labels.shape[0],labels.shape[1]))
+	for c in [0,1,2]:
+		mask_c = np.zeros((labels.shape[0],labels.shape[1]))
+		index = (labels[:,:,c] == sunglasses_color[c])
+		mask_c[index] = 1
+		mask = mask * mask_c
+
+	if np.sum(mask) > 0:
+		# print(bcolors.BLUE + "Already has sunglasses: " + base_name + bcolors.ENDC)
+		# cv2.imwrite(output_folder_debug + base_name + '.ppm', labels)
+		counter_with_glasses += 1
+		continue
 
 	# Face image
 	image = cv2.imread(os.path.join(faces_folder, face_file))
@@ -230,27 +239,11 @@ for n, face_file in enumerate(os.listdir(faces_folder)):
 
 		# Eyes are more reliable to estimate face size, even for masks
 		reference_size = (left_eye[0] - right_eye[0]) * 0.5
+		middle_eye = (left_eye + right_eye) * 0.5
 
-		# Mouth detection
-		mouths = mouth_cascade.detectMultiScale(roi_gray, 1.1, 7)
-		if not len(mouths): 
-			counter_no_mouth += 1
-			continue
-
-		# Take the first apparently well-located mouth
-		save_guard = 10	# pixels below face center
-		for i, (mx, my, mw, mh) in enumerate(mouths):
-			mouth_center = [x + mx + mw * 0.5, y + my + mh * 0.5]
-			if mouth_center[1] > face_center[1] + save_guard:
-				# cv2.rectangle(roi_color, (mx, my), (mx+mw, my+mh), (0, 255, 0), 2)
-				break
-			if (i+1) == len(mouths):
-				counter_no_mouth += 1
-				continue
-
-		# Paste mask on the mouth 
+		# Paste sunglasses on the eyes 
 		# Use only a random number of the available: shuffle the list and take the k first
-		shuffle(masks)
+		shuffle(sunglasses)
 		for i in range(10):
 			
 			# create copies so we don't keep pasting items on the same image all the time
@@ -258,12 +251,12 @@ for n, face_file in enumerate(os.listdir(faces_folder)):
 			lb = labels.copy()
 
 			# augmentation id for storing the file
-			M      = masks[i][0]
-			aug_id = masks[i][1]
+			G      = sunglasses[i][0]
+			aug_id = sunglasses[i][1]
 			#aug_id = str(i).zfill(4)
 
 			# overlay item
-			objectOverlay(im, M, reference_size, mouth_center, lb, "mouth-mask" )
+			objectOverlay(im, G, reference_size, middle_eye, lb, "sunglasses" )
 
 			# save image and labels
 			augmented_face_file   = os.path.join(output_folder_faces,  base_name+'_'+aug_id+'.jpg')
@@ -281,7 +274,6 @@ print(       bcolors.BOLD + "With real sunglasses ..... " + bcolors.ENDC + str(c
 print(       bcolors.BOLD + "No face detected ......... " + bcolors.ENDC + str(counter_no_face))
 print(       bcolors.BOLD + "Several faces detected ... " + bcolors.ENDC + str(counter_multiple_faces))
 print(       bcolors.BOLD + "No eyes detected ......... " + bcolors.ENDC + str(counter_no_eyes))
-print(       bcolors.BOLD + "No mouth detected ........ " + bcolors.ENDC + str(counter_no_mouth))
 print(       bcolors.BOLD + "Saved images ............. " + bcolors.ENDC + str(counter_saved_images))
 print("\n")
 

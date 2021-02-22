@@ -52,7 +52,7 @@ def onClick(event,x,y,flags,param):
 # ---------------------------------------------------------------------------------------
 
 if len(sys.argv) < 3 or len(sys.argv) > 4:
-	print("Usage: $ lfw-refineMe <faces_folder> <labels_folder> folder_per_person [optional boolean]")
+	print("Usage: $ elfw-refineMe <faces_folder> <labels_folder> folder_per_person [optional boolean]")
 	exit(0)
 
 # faces_folder = '../Datasets/lfw-deepfunneled/'

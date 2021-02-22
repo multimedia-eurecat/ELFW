@@ -69,7 +69,7 @@ def objectOverlay(canvas, item, reference_distance, reference_center, labels, it
 #----------------------------------------------------------------------------------------------------
 
 if len(sys.argv) != 6:
-	print("Usage: $ lfw-makeItLookCool <faces folder> <labels folder> <wearables folder> <hands folder> <output folder>")
+	print("Usage: $ elfw-makeItLookCool <faces folder> <labels folder> <wearables folder> <hands folder> <output folder>")
 	exit(0)
 
 faces_folder 		= sys.argv[1] + '/'

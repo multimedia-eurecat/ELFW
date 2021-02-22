@@ -80,7 +80,7 @@ def onClick(event,x,y,flags,param):
 # ---------------------------------------------------------------------------------------
 
 if len(sys.argv) != 4:
-	print("Usage: $ lfw-scribbleMe <faces_folder> <superpixels_folder> <output_folder>")
+	print("Usage: $ elfw-scribbleMe <faces_folder> <superpixels_folder> <output_folder>")
 	exit(0)
 
 faces_folder 	= sys.argv[1]

@@ -44,7 +44,7 @@ class bcolors:
 #----------------------------------------------------------------------------------------------------
 
 if len(sys.argv) != 3:
-	print("Usage: $ lfw-separateSunglasses4Validation.py <labels folder> <output_file_location>")
+	print("Usage: $ elfw-separateSunglasses4Validation.py <labels folder> <output_file_location>")
 	exit(0)
 
 labels_folder      = sys.argv[1]

@@ -61,14 +61,14 @@ The folder `./demos` contains code snippets to test the GCN model over the webca
 
 ## Handy scripting toolbox
 
-The folder `./scripts` contains some useful code tools for labeling and processing the dataset. The main files are:
+The folder `./scripts` contains some useful code tools for labeling and processing the dataset. Main files are:
 
 - `computeClassWeights.py`: computes weight for class balancing over the training loss.
-- `lfw-makeThemWearMasks.py`: overlays synthetic masks (must provide) on face images.
-- `lfw-makeThemWearSunglasses.py`: same for sunglasses.
-- `lfw-putYourHandsOnMeWithDlib.py`: same for hands based on Dlib.
-- `lfw-scribbleMe.py`: tool for label annotation by filling superpixels on mouse scribbling.
-- `lfw-refineMe.py`: tool for refining the annotated segments.
+- `elfw-makeThemWearMasks.py`: overlays synthetic masks (must provide) on face images.
+- `elfw-makeThemWearSunglasses.py`: same for sunglasses.
+- `elfw-putYourHandsOnMeWithDlib.py`: same for hands based on Dlib.
+- `elfw-scribbleMe.py`: tool for label annotation by filling superpixels on mouse scribbling.
+- `elfw-refineMe.py`: tool for refining the annotated segments.
 
 --- 
 	Rafael Redondo and Jaume Gibert (c) 2019-20 Eurecat
