@@ -8,7 +8,7 @@ import cv2
 from shutil import copyfile
 
 if len(sys.argv) != 4:
-	print("Usage: $ lfw-findNonExtended <faces_folder> <labels_folder> <output_folder>")
+	print("Usage: $ elfw-findNonExtended <faces_folder> <labels_folder> <output_folder>")
 	exit(0)
 
 faces_path  = sys.argv[1]   # '../elfw/elfw_Baseline/faces'

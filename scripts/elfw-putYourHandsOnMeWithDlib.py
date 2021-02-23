@@ -14,6 +14,10 @@
 #
 # R. Redondo (c) Eurecat 2019
 
+# IMPORTANT NOTE: some hands in Hand Over Faces and Hand2Face datasets present visual artifacts 
+# after color correction. They have been identified in the script elfw-cleaner.py.
+# Run it immediately after hand data augmentation is done.
+
 import os
 import sys
 import math

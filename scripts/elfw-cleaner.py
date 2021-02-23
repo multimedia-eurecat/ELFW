@@ -3,19 +3,16 @@
 
 import os
 
-source_path = '../elfw_augmented_facehands'
+source_path = '../elfw/elfw_AugmentedHands'
 path_faces = os.path.join(source_path, 'faces')
 path_labels = os.path.join(source_path, 'labels')
 
-target_strs = [ 'h2f_web-133',
-                'h2f_web-147',
-                'h2f_web-157',
+target_strs = [ 'h2f_web-147',
                 'hof-005',
                 'hof-032',
                 'hof-042',
                 'hof-143',
                 'hof-184',
-                'Barbara_Boxer',
                 'Devin_Harris']
 
 def clean(path):

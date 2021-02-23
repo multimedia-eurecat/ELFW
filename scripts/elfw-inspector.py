@@ -7,7 +7,7 @@ import cv2
 import os
 
 if len(sys.argv) != 4:
-	print("Usage: $ lfw-inspector <people faces folder> <superpixels folder> <output folder>")
+	print("Usage: $ elfw-inspector <people faces folder> <superpixels folder> <output folder>")
 	exit(0)
 
 faces_folder = sys.argv[1]
