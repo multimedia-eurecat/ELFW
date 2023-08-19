@@ -70,5 +70,13 @@ The folder `./scripts` contains some useful code tools for labeling and processi
 - `elfw-scribbleMe.py`: tool for label annotation by filling superpixels on mouse scribbling.
 - `elfw-refineMe.py`: tool for refining the annotated segments.
 
+
+## BibTeX Citation
+	@article{redondo2020extended,
+	  title={Extended labeled faces in-the-wild (elfw): Augmenting classes for face segmentation},
+	  author={Redondo, Rafael and Gibert, Jaume},
+	  journal={arXiv preprint arXiv:2006.13980},
+	  year={2020}
+	}
 --- 
 	Rafael Redondo and Jaume Gibert (c) 2019-20 Eurecat
